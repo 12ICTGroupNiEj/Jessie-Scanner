@@ -1,155 +1,20 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#0A2463">
-  <title>Dampol 1st NHS — Barcode Attendance</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0a2463" />
+  <meta name="description" content="Barcode student verification and attendance for Dampol 1st National High School." />
+  <title>Dampol Barcode Attendance</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header class="topbar">
-    <div>
-      <h1>Dampol 1st National High School</h1>
-      <p>Barcode Gate Verification & Attendance System</p>
-    </div>
-    <button id="adminBtn" class="ghost-btn">Admin</button>
-  </header>
-
-  <main class="container">
-    <section id="guardView">
-      <div class="hero-card">
-        <div>
-          <span class="eyebrow">SCHOOL GUARD</span>
-          <h2>Scan Student ID</h2>
-          <p>Point the camera at the compact barcode printed on the student ID.</p>
-        </div>
-        <button id="scanBtn" class="scan-btn">▣ SCAN BARCODE</button>
-      </div>
-
-      <div id="scannerPanel" class="scanner-panel hidden">
-        <video id="camera" autoplay playsinline muted></video>
-        <div class="scan-frame"></div>
-        <p id="scannerMessage">Starting camera…</p>
-        <button id="stopScanBtn" class="secondary-btn">Stop Scanner</button>
-      </div>
-
-      <div id="statusBox" class="status-box">Ready to scan.</div>
-
-      <div id="studentCard" class="student-card hidden">
-        <div class="verified-banner">✓ VERIFIED — Officially Enrolled</div>
-        <div class="student-content">
-          <div class="photo-wrap">
-            <img id="studentPhoto" alt="Student photo">
-          </div>
-          <div class="student-info">
-            <p class="school-mini">DAMPOL 1ST NATIONAL HIGH SCHOOL</p>
-            <h2 id="studentName">Student Name</h2>
-            <div class="info-row"><b>LRN</b><span id="studentLRN"></span></div>
-            <div class="info-row"><b>Grade & Section</b><span id="studentSection"></span></div>
-            <div id="attendanceState" class="attendance-state"></div>
-          </div>
-        </div>
-        <div class="confirm-actions">
-          <button id="presentBtn" class="confirm-btn">✓ MARK PRESENT</button>
-          <button id="timeoutBtn" class="timeout-btn">TIME OUT</button>
-        </div>
-        <p class="face-note">Guard: confirm that the student's face matches the official photo before marking attendance.</p>
-      </div>
-
-      <div id="notRegistered" class="not-registered hidden">
-        <div class="x-icon">×</div>
-        <h2>NOT REGISTERED</h2>
-        <p>This barcode/LRN is not in the Dampol 1st NHS local database.</p>
-        <strong>ENTRY NOT AUTHORIZED</strong>
-      </div>
-    </section>
-
-    <section class="dashboard">
-      <div class="dashboard-head">
-        <div>
-          <span class="eyebrow">TODAY</span>
-          <h2>Attendance Log</h2>
-        </div>
-        <select id="gradeFilter">
-          <option value="All">All Grades</option>
-          <option value="11">Grade 11</option>
-          <option value="12">Grade 12</option>
-        </select>
-      </div>
-      <div class="stats">
-        <div><b id="totalStudents">0</b><span>Students</span></div>
-        <div><b id="presentCount">0</b><span>Present</span></div>
-        <div><b id="timeoutCount">0</b><span>Time Out</span></div>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Date</th><th>Time</th><th>Name</th><th>LRN</th><th>Grade-Section</th><th>Status</th></tr></thead>
-          <tbody id="attendanceBody"><tr><td colspan="6" class="empty">No attendance records yet.</td></tr></tbody>
-        </table>
-      </div>
-    </section>
-  </main>
-
-  <div id="adminModal" class="modal hidden">
-    <div class="modal-card">
-      <button class="close-btn" id="closeAdmin">×</button>
-      <div id="pinView">
-        <span class="eyebrow">ADMIN ACCESS</span>
-        <h2>Enter Admin PIN</h2>
-        <p>Default PIN for first setup: <b>1234</b>. Change it after opening Admin.</p>
-        <input id="pinInput" type="password" inputmode="numeric" maxlength="12" placeholder="Admin PIN">
-        <button id="pinSubmit" class="primary-btn">OPEN ADMIN</button>
-        <p id="pinError" class="error"></p>
-      </div>
-
-      <div id="adminView" class="hidden">
-        <div class="admin-tabs">
-          <button class="tab active" data-tab="studentsTab">Students</button>
-          <button class="tab" data-tab="attendanceTab">Attendance</button>
-          <button class="tab" data-tab="settingsTab">Settings</button>
-        </div>
-
-        <section id="studentsTab" class="admin-tab">
-          <h2>Student Database</h2>
-          <form id="studentForm">
-            <input id="lrnInput" required placeholder="LRN" inputmode="numeric">
-            <input id="nameInput" required placeholder="Full Name">
-            <input id="sectionInput" required placeholder="Grade & Section e.g. 11-ICT A">
-            <label class="file-label">Student Photo <input id="photoInput" type="file" accept="image/*"></label>
-            <button class="primary-btn" type="submit">SAVE STUDENT & GENERATE BARCODE</button>
-          </form>
-          <div id="barcodeOutput" class="barcode-output hidden">
-            <h3>Compact ID Barcode</h3>
-            <div id="barcodeSvg"></div>
-            <p id="barcodeCaption"></p>
-            <button id="printBarcodeBtn" class="secondary-btn">PRINT BARCODE</button>
-          </div>
-          <div class="student-list-wrap">
-            <table>
-              <thead><tr><th>LRN</th><th>Name</th><th>Grade-Section</th><th>Barcode</th><th></th></tr></thead>
-              <tbody id="studentBody"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <section id="attendanceTab" class="admin-tab hidden">
-          <h2>Export Attendance</h2>
-          <p>CSV opens directly in Microsoft Excel and can be saved as .xlsx.</p>
-          <button id="exportBtn" class="primary-btn">EXPORT CSV FOR EXCEL</button>
-          <button id="clearAttendanceBtn" class="danger-btn">CLEAR ALL ATTENDANCE</button>
-        </section>
-
-        <section id="settingsTab" class="admin-tab hidden">
-          <h2>Admin Settings</h2>
-          <label>Change Admin PIN <input id="newPin" type="password" inputmode="numeric" maxlength="12" placeholder="New PIN"></label>
-          <button id="changePinBtn" class="primary-btn">CHANGE PIN</button>
-          <p class="small">All student and attendance data is stored in this browser's local storage. No server is required.</p>
-        </section>
-      </div>
-    </div>
-  </div>
-
-  <script src="script.js"></script>
+  <div id="app"></div>
+  <div id="modal-root"></div>
+  <noscript>Kailangan paganahin ang JavaScript para magamit ang attendance app.</noscript>
+  <script type="module" src="script.js"></script>
 </body>
 </html>
