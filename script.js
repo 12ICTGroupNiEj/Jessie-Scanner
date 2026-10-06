@@ -90,6 +90,11 @@ function renderApp() {
         <div class="student-info"><p class="school-mini">DAMPOL 1ST NATIONAL HIGH SCHOOL</p><h2>${escapeHtml(student.name)}</h2>
           <div class="info-row"><b>LRN</b><span>${escapeHtml(student.lrn)}</span></div>
           <div class="info-row"><b>Grade &amp; Section</b><span>${escapeHtml(student.section)}</span></div>
+          ${student.adviser ? `<div class="info-row"><b>Adviser</b><span>${escapeHtml(student.adviser)}</span></div>` : ''}
+          ${student.sex ? `<div class="info-row"><b>Sex</b><span>${escapeHtml(student.sex)}</span></div>` : ''}
+          ${student.guardian ? `<div class="info-row"><b>Guardian / Parent</b><span>${escapeHtml(student.guardian)}</span></div>` : ''}
+          ${student.contact ? `<div class="info-row"><b>Contact No.</b><span>${escapeHtml(student.contact)}</span></div>` : ''}
+          ${student.address ? `<div class="info-row"><b>Address</b><span>${escapeHtml(student.address)}</span></div>` : ''}
           <div class="attendance-state">${latest ? `Today's latest status: ${escapeHtml(latest.status)} at ${escapeHtml(latest.time)}` : 'No attendance marked today.'}</div>
         </div>
       </div>
@@ -246,8 +251,8 @@ function renderAdminModal() {
 function renderAdminTab() {
   if (activeTab === 'students') {
     const barcode = lastSavedStudent ? (() => { try { return barcodeSvg(lastSavedStudent.barcode); } catch { return ''; } })() : '';
-    const list = students.length ? students.map((entry) => `<tr><td>${escapeHtml(entry.lrn)}</td><td>${escapeHtml(entry.name)}</td><td>${escapeHtml(entry.section)}</td><td class="mini-barcode">${escapeHtml(entry.barcode)}</td><td><button class="delete-btn" data-action="delete-student" data-lrn="${escapeHtml(entry.lrn)}">Delete</button></td></tr>`).join('') : '<tr><td class="empty" colspan="5">No students registered.</td></tr>';
-    return `<section class="admin-tab"><h2>Student Database</h2><form class="student-form" id="student-form"><input class="field-input" name="lrn" required placeholder="LRN" inputmode="numeric" aria-label="LRN"><input class="field-input" name="name" required placeholder="Full Name" aria-label="Full Name"><input class="field-input" name="section" required placeholder="Grade & Section e.g. 11-ICT A" aria-label="Grade and section"><label class="file-label">Student Photo<input class="field-input" name="photo" type="file" accept="image/*" aria-label="Student photo"></label><button class="primary-btn" type="submit">＋ SAVE STUDENT &amp; GENERATE BARCODE</button></form>${lastSavedStudent ? `<div class="barcode-output"><h3>Compact ID Barcode · Code 128</h3>${barcode}<p>LRN: ${escapeHtml(lastSavedStudent.lrn)} — compact Code 128 barcode</p><button class="secondary-btn" data-action="print-barcode">▤ PRINT BARCODE</button></div>` : ''}<div class="student-list-wrap"><table><thead><tr><th>LRN</th><th>Name</th><th>Grade-Section</th><th>Barcode</th><th>Actions</th></tr></thead><tbody>${list}</tbody></table></div></section>`;
+    const list = students.length ? students.map((entry) => `<tr><td>${escapeHtml(entry.lrn)}</td><td>${escapeHtml(entry.name)}</td><td>${escapeHtml(entry.section)}</td><td>${escapeHtml(entry.adviser || '')}</td><td>${escapeHtml(entry.sex || '')}</td><td>${escapeHtml(entry.guardian || '')}</td><td>${escapeHtml(entry.contact || '')}</td><td>${escapeHtml(entry.address || '')}</td><td class="mini-barcode">${escapeHtml(entry.barcode)}</td><td><button class="delete-btn" data-action="delete-student" data-lrn="${escapeHtml(entry.lrn)}">Delete</button></td></tr>`).join('') : '<tr><td class="empty" colspan="10">No students registered.</td></tr>';
+    return `<section class="admin-tab"><h2>Student Database</h2><form class="student-form" id="student-form"><input class="field-input" name="lrn" required placeholder="LRN" inputmode="numeric" aria-label="LRN"><input class="field-input" name="name" required placeholder="Full Name" aria-label="Full Name"><input class="field-input" name="section" required placeholder="Grade & Section e.g. 11-ICT A" aria-label="Grade and section"><input class="field-input" name="adviser" required placeholder="Name of Adviser" aria-label="Name of adviser"><select class="field-input" name="sex" required aria-label="Sex"><option value="" disabled selected>Sex (Male / Female)</option><option value="Male">Male</option><option value="Female">Female</option></select><input class="field-input" name="guardian" required placeholder="Guardian / Parent Name" aria-label="Guardian or parent name"><input class="field-input" name="contact" type="tel" inputmode="tel" required placeholder="Contact Number e.g. 09123456789" pattern="[0-9+ \\-]{7,15}" title="Contact number (7-15 digits)" aria-label="Contact number"><input class="field-input" name="address" required placeholder="Complete Address" aria-label="Address"><label class="file-label">Student Photo<input class="field-input" name="photo" type="file" accept="image/*" aria-label="Student photo"></label><button class="primary-btn" type="submit">＋ SAVE STUDENT &amp; GENERATE BARCODE</button></form>${lastSavedStudent ? `<div class="barcode-output"><h3>Compact ID Barcode · Code 128</h3>${barcode}<p>${escapeHtml(lastSavedStudent.name)} · ${escapeHtml(lastSavedStudent.section)} · Adviser: ${escapeHtml(lastSavedStudent.adviser || '')}</p><p>LRN: ${escapeHtml(lastSavedStudent.lrn)} — compact Code 128 barcode</p><button class="secondary-btn" data-action="print-barcode">▤ PRINT BARCODE</button></div>` : ''}<div class="student-list-wrap"><table><thead><tr><th>LRN</th><th>Name</th><th>Grade-Section</th><th>Adviser</th><th>Sex</th><th>Guardian / Parent</th><th>Contact No.</th><th>Address</th><th>Barcode</th><th>Actions</th></tr></thead><tbody>${list}</tbody></table></div></section>`;
   }
   if (activeTab === 'attendance') return '<section class="admin-tab"><h2>Export Attendance</h2><p class="admin-tab-copy">Export the full attendance history. CSV opens directly in Microsoft Excel.</p><button class="primary-btn" data-action="export-attendance">EXPORT CSV FOR EXCEL</button><button class="danger-btn" data-action="clear-attendance">CLEAR ALL ATTENDANCE</button></section>';
   return `<section class="admin-tab"><h2>Admin Settings</h2><label class="settings-field">Change Admin PIN<input id="new-pin" type="password" inputmode="numeric" maxlength="12" placeholder="New PIN" value="${escapeHtml(newPin)}"></label><button class="primary-btn" data-action="change-pin">CHANGE PIN</button><p class="small">Student and attendance data are stored in this browser only. No server is required.</p></section>`;
@@ -266,9 +271,14 @@ async function saveStudent(form) {
   const lrn = String(fields.get('lrn') || '').trim();
   const name = String(fields.get('name') || '').trim();
   const section = String(fields.get('section') || '').trim();
+  const adviser = String(fields.get('adviser') || '').trim();
+  const sex = String(fields.get('sex') || '').trim();
+  const guardian = String(fields.get('guardian') || '').trim();
+  const contact = String(fields.get('contact') || '').trim();
+  const address = String(fields.get('address') || '').trim();
   if (students.some((entry) => entry.lrn === lrn)) { alert('That LRN is already registered.'); return; }
   const photo = await readPhoto(fields.get('photo'));
-  const record = { lrn, name, section, photo, barcode: lrn };
+  const record = { lrn, name, section, adviser, sex, guardian, contact, address, photo, barcode: lrn };
   students.push(record);
   saveStudents();
   lastSavedStudent = record;
@@ -299,7 +309,7 @@ function printBarcode() {
   if (!lastSavedStudent) return;
   const printWindow = window.open('', '_blank');
   if (!printWindow) { alert('Allow pop-ups to print the student barcode.'); return; }
-  printWindow.document.write(`<!doctype html><html><head><title>Dampol student barcode</title><style>body{font:14px Arial,sans-serif;text-align:center;padding:42px;color:#15233d}.id{display:inline-block;border:1px solid #dce3ed;border-radius:12px;padding:24px 28px}svg{width:310px;height:75px}.name{font-weight:700;margin:12px 0 5px}.caption{font:11px monospace;color:#58657b}</style></head><body><div class="id">${barcodeSvg(lastSavedStudent.barcode)}<div class="name">${escapeHtml(lastSavedStudent.name)}</div><div class="caption">LRN: ${escapeHtml(lastSavedStudent.lrn)} · Code 128</div></div><script>window.onload=()=>window.print()<\/script></body></html>`);
+  printWindow.document.write(`<!doctype html><html><head><title>Dampol student barcode</title><style>body{font:14px Arial,sans-serif;text-align:center;padding:42px;color:#15233d}.id{display:inline-block;border:1px solid #dce3ed;border-radius:12px;padding:24px 28px}svg{width:310px;height:75px}.name{font-weight:700;margin:12px 0 5px}.caption{font:11px monospace;color:#58657b}</style></head><body><div class="id">${barcodeSvg(lastSavedStudent.barcode)}<div class="name">${escapeHtml(lastSavedStudent.name)}</div><div class="caption">${escapeHtml(lastSavedStudent.section)} · Adviser: ${escapeHtml(lastSavedStudent.adviser || '')}</div><div class="caption">LRN: ${escapeHtml(lastSavedStudent.lrn)} · Code 128</div></div><script>window.onload=()=>window.print()<\/script></body></html>`);
   printWindow.document.close();
 }
 function clearAttendance() {
