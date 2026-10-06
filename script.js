@@ -67,6 +67,7 @@ let activeTab = 'students';
 let lastSavedStudent = null;
 let newPin = '';
 const presentGuard = new Set();
+const timeoutGuard = new Set();
 
 function saveStudents() { writeLocal(STUDENTS_KEY, students); }
 function saveAttendance() { writeLocal(ATTENDANCE_KEY, attendance); }
@@ -77,6 +78,10 @@ function markedPresent(current) {
   return attendance.some((entry) => entry.date === today() && entry.lrn === current.lrn && entry.status === 'PRESENT');
 }
 
+function markedTimeOut(current) {
+  return attendance.some((entry) => entry.date === today() && entry.lrn === current.lrn && entry.status === 'TIME OUT');
+}
+
 function renderApp() {
   const todayRecords = attendance.filter((record) => record.date === today());
   const visibleRecords = todayRecords.filter((record) => filter === 'All' || record.grade === filter);
@@ -84,6 +89,7 @@ function renderApp() {
   const studentCard = student ? (() => {
     const latest = latestStudentStatus(student);
     const alreadyPresent = markedPresent(student);
+    const alreadyTimedOut = markedTimeOut(student);
     return `<article class="student-card">
       <div class="verified-banner"><span aria-hidden="true">✿</span> VERIFIED — Officially Enrolled</div>
       <div class="student-content"><div class="photo-wrap"><img src="${escapeHtml(safePhoto(student.photo))}" alt="${escapeHtml(student.name)} student photo"></div>
@@ -100,7 +106,7 @@ function renderApp() {
       </div>
       <div class="confirm-actions">
         <button class="confirm-btn" data-action="mark-present" ${alreadyPresent ? 'disabled title="This student is already marked present today."' : ''}>✓ ${alreadyPresent ? 'ALREADY MARKED PRESENT' : 'MARK PRESENT'}</button>
-        <button class="timeout-btn" data-action="mark-timeout">TIME OUT</button>
+        <button class="timeout-btn" data-action="mark-timeout" ${alreadyTimedOut ? 'disabled title="This student already timed out today."' : ''}>${alreadyTimedOut ? 'ALREADY TIMED OUT' : 'TIME OUT'}</button>
       </div>
       <p class="face-note">Guard: confirm that the student's face matches the official photo before marking attendance.</p>
     </article>`;
@@ -217,6 +223,13 @@ function markAttendance(status) {
       return;
     }
     presentGuard.add(key);
+  } else if (status === 'TIME OUT') {
+    if (markedTimeOut(student) || timeoutGuard.has(key)) {
+      statusMessage = `${student.name} already timed out today.`;
+      renderApp();
+      return;
+    }
+    timeoutGuard.add(key);
   }
   const grade = (student.section.match(/^(\d{2})/) || [])[1] || '';
   attendance.push({ date, time: nowTime(), name: student.name, lrn: student.lrn, grade, section: student.section, status });
@@ -316,6 +329,7 @@ function clearAttendance() {
   if (!confirm('Clear ALL attendance records? This cannot be undone.')) return;
   attendance = [];
   presentGuard.clear();
+  timeoutGuard.clear();
   saveAttendance();
   renderApp();
   renderAdminModal();
